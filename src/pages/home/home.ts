@@ -27,12 +27,12 @@ export class HomePage {
     private imagePicker: ImagePicker) {
     this.notes = angularFire.database.list('/notes');
   }
-  
+
   addNote() {
     let prompt = this.alertCtrl.create(
       {
-        title: "New Note",
-        message: "Enter the text for the new note",
+        title: "Add note",
+        message: "Enter the data for the new note",
         inputs: [
           {
             name: "title",
@@ -62,7 +62,8 @@ export class HomePage {
               this.notes.push(note);
             }
           }
-        ]
+        ],
+        cssClass: 'danger'
       });
     prompt.present();
   }
@@ -95,8 +96,8 @@ export class HomePage {
   updateNote(noteId, noteTitle, noteContent) {
     let prompt = this.alertCtrl.create(
       {
-        title: "Update text",
-        message: "Update text for the note",
+        title: "Update note",
+        message: "Update the data for the note",
         inputs: [
           {
             name: "title",
