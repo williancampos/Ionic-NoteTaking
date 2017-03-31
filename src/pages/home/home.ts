@@ -132,39 +132,48 @@ export class HomePage {
     prompt.present();
   }
 
-  pickImage(noteId, noteTitle, noteContent) {
+  pickImage(noteId, noteTitle, noteContent, previousImage) {
     this.imagePicker.getPictures({
       maximumImagesCount: 1,
       quality: 70,
       outputType: 1
     }).then((results) => {
       if (results.length == 1) {
-        let prompt = this.alertCtrl.create(
-          {
-            title: "Change image",
-            message: "Do you really want to change the image?",
-            buttons: [
-              {
-                text: "Cancel",
-                handler: data => {
-                  console.log('Cancel clicked');
+        if (previousImage != null) {
+          let prompt = this.alertCtrl.create(
+            {
+              title: "Change image",
+              message: "Do you really want to change the image?",
+              buttons: [
+                {
+                  text: "Cancel",
+                  handler: data => {
+                    console.log('Cancel clicked');
+                  }
+                },
+                {
+                  text: "Change",
+                  handler: data => {
+                    this.updateImage(noteId, results[0]);
+                  }
                 }
-              },
-              {
-                text: "Change",
-                handler: data => {
-                  this.notes.update(noteId,
-                    {
-                      image: 'data:image/jpg;base64,' + results[0],
-                      date: new Date().getTime()
-                    });
-                }
-              }
-            ]
-          });
-        prompt.present();
+              ]
+            });
+          prompt.present();
+        } else {
+          this.updateImage(noteId, results[0]);
+        }
+          
       }
     }, (err) => { });
+  }
+
+  updateImage(noteId, newImage) {
+    this.notes.update(noteId,
+                    {
+                      image: 'data:image/jpg;base64,' + newImage,
+                      date: new Date().getTime()
+                    });
   }
 
   removeImage(noteId, noteTitle, noteContent) {
