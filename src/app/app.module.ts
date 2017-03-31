@@ -4,6 +4,7 @@ import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { AngularFireModule } from 'angularfire2';
 import { SocialSharing } from '@ionic-native/social-sharing'
+import { ImagePicker } from '@ionic-native/image-picker'
  
 export const firebaseConfig = {
   apiKey: "AIzaSyA-Sl-u5KXyIJHg9OBlWuVDhY5SlY0iSZM",
@@ -27,6 +28,6 @@ export const firebaseConfig = {
     MyApp,
     HomePage
   ],
-  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, SocialSharing]
+  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, SocialSharing, ImagePicker]
 })
 export class AppModule {}

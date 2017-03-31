@@ -7,6 +7,9 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
 // Import social sharing
 import { SocialSharing } from '@ionic-native/social-sharing';
 
+// Import picture chooser
+import { ImagePicker } from '@ionic-native/image-picker';
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
@@ -14,55 +17,17 @@ import { SocialSharing } from '@ionic-native/social-sharing';
 export class HomePage {
 
   notes: FirebaseListObservable<any[]>;
-  bla: Date;
 
   constructor(
     public navCtrl: NavController,
     public alertCtrl: AlertController,
     public actionSheetCtrl: ActionSheetController,
     angularFire: AngularFire,
-    private socialSharing: SocialSharing) {
+    private socialSharing: SocialSharing,
+    private imagePicker: ImagePicker) {
     this.notes = angularFire.database.list('/notes');
-    this.bla = new Date();
   }
-
-  showOptions(noteId, noteTitle, noteContent, noteDate) {
-    let actionSheet = this.actionSheetCtrl.create(
-      {
-        title: "What do you want to do?",
-        buttons: [
-          {
-            text: "Share",
-            handler: () => {
-              this.shareNote(noteTitle, noteContent);
-            }
-          },
-          {
-            text: "Delete",
-            role: "destructive",
-            handler: () => {
-              this.removeNote(noteId);
-            }
-          },
-          {
-            text: "Update",
-            handler: () => {
-              this.updateNote(noteId, noteTitle, noteContent);
-            }
-          },
-          {
-            text: "Cancel",
-            role: "cancel",
-            handler: () => {
-              console.log("Cancel clicked");
-            }
-          }
-        ]
-      }
-    )
-    actionSheet.present();
-  }
-
+  
   addNote() {
     let prompt = this.alertCtrl.create(
       {
@@ -102,6 +67,7 @@ export class HomePage {
     prompt.present();
   }
 
+
   removeNote(noteId: string) {
     let prompt = this.alertCtrl.create(
       {
@@ -123,7 +89,7 @@ export class HomePage {
         ]
       });
     prompt.present();
-    
+
   }
 
   updateNote(noteId, noteTitle, noteContent) {
@@ -165,8 +131,71 @@ export class HomePage {
     prompt.present();
   }
 
-  shareNote(noteTitle, noteContent) {
-    this.socialSharing.share(noteTitle, noteTitle, null, "\n" + noteContent).then(() => {
+  pickImage(noteId, noteTitle, noteContent) {
+    this.imagePicker.getPictures({
+      maximumImagesCount: 1,
+      quality: 70,
+      outputType: 1
+    }).then((results) => {
+      if (results.length == 1) {
+        let prompt = this.alertCtrl.create(
+          {
+            title: "Change image",
+            message: "Do you really want to change the image?",
+            buttons: [
+              {
+                text: "Cancel",
+                handler: data => {
+                  console.log('Cancel clicked');
+                }
+              },
+              {
+                text: "Change",
+                handler: data => {
+                  this.notes.update(noteId,
+                    {
+                      image: 'data:image/jpg;base64,' + results[0],
+                      date: new Date().getTime()
+                    });
+                }
+              }
+            ]
+          });
+        prompt.present();
+      }
+    }, (err) => { });
+  }
+
+  removeImage(noteId, noteTitle, noteContent) {
+    let prompt = this.alertCtrl.create(
+      {
+        title: "Delete image",
+        message: "Do you really want do delete this image?",
+        buttons: [
+          {
+            text: "Cancel",
+            handler: data => {
+              console.log('Cancel clicked');
+            }
+          },
+          {
+            text: "Delete",
+            handler: data => {
+              this.notes.update(noteId,
+                {
+                  image: null,
+                  date: new Date().getTime()
+                });
+            }
+          }
+        ]
+      });
+    prompt.present();
+
+  }
+
+  shareNote(noteTitle, noteContent, noteImage) {
+    this.socialSharing.share(noteTitle, noteTitle, noteImage, "\n" + noteContent).then(() => {
       console.log("Note shared successfully.");
     }).catch(() => {
       console.log("It was not possible to share the note.");
